@@ -1,0 +1,26 @@
+[project]
+name = "postgres-smcp-server"
+version = "0.1.0"
+description = "SMCP-enabled MCP server for PostgreSQL with secure credential injection"
+authors = [
+    { name = "SMCP Project" },
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["postgres", "postgresql", "mcp", "smcp", "model-context-protocol"]
+dependencies = [
+    "mcp>=1.6.0",
+    "psycopg[binary]>=3.1.0",
+    "smcp",
+]
+
+[project.scripts]
+smcp-server-postgres = "postgres_smcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/postgres_smcp_server"]

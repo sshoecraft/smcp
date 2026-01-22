@@ -1,0 +1,27 @@
+[project]
+name = "adls-smcp-server"
+version = "0.1.0"
+description = "SMCP-enabled MCP server for Azure Data Lake Storage Gen2"
+authors = [
+    { name = "SMCP Project" },
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["azure", "adls", "mcp", "smcp", "model-context-protocol"]
+dependencies = [
+    "azure-identity>=1.21.0",
+    "azure-storage-file-datalake>=12.20.0",
+    "mcp>=1.6.0",
+    "smcp",
+]
+
+[project.scripts]
+smcp-server-adls = "adls_smcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adls_smcp_server"]
