@@ -33,6 +33,14 @@ Child  → Parent:  +OK
 
 See [SPEC.md](SPEC.md) for the full protocol specification.
 
+## Reference Implementation
+
+[Shepherd](https://github.com/sshoecraft/shepherd) is an MCP server that implements SMCP for spawning child MCP servers. It loads its configuration from Azure Key Vault via Managed Identity, then injects credentials into SMCP-compliant child servers — zero credentials in the environment, CLI args, or files.
+
+```
+shepherd --config msi --kv my-vault
+```
+
 ## License
 
 MIT
