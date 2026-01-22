@@ -1,6 +1,6 @@
 # SMCP: Secure MCP Credential Protocol
 
-**Version:** 0.1  
+**Version:** 0.2  
 **Status:** Draft  
 **Author:** Steve  
 
@@ -10,9 +10,9 @@ SMCP defines a minimal protocol for injecting credentials into MCP servers at st
 
 ## Goals
 
-- **Simple:** Implementable in <50 lines of code
+- **Simple:** Implementable in <10 lines of code
 - **Secure:** Credentials never touch disk or environment
-- **Universal:** No dependencies, any language
+- **Universal:** No dependencies, uses built-in JSON parsers
 - **Auditable:** Parent controls exactly what each child receives
 
 ## Transport
@@ -20,16 +20,15 @@ SMCP defines a minimal protocol for injecting credentials into MCP servers at st
 - **Downstream (parent → child):** stdin
 - **Upstream (child → parent):** stdout
 - **Framing:** Line-based, UTF-8, `\n` terminated
+- **Credential format:** Single-line JSON object
 
 ## Handshake
 
 ```
 Child  → Parent:  +READY\n
-Parent → Child:   +CRED\n
-Parent → Child:   <key>=<value>\n   (repeated)
-Parent → Child:   +END\n
-Child  → Parent:  +OK <count>\n | +ERR <message>\n
-(stdin closed, child proceeds with MCP initialization)
+Parent → Child:   {"key":"value",...}\n
+Child  → Parent:  +OK\n | +ERR <message>\n
+── SMCP complete, stdin/stdout transitions to MCP JSON-RPC ──
 ```
 
 ## Messages
@@ -37,93 +36,106 @@ Child  → Parent:  +OK <count>\n | +ERR <message>\n
 | Message | Direction | Description |
 |---------|-----------|-------------|
 | `+READY` | C→P | Child is ready to receive credentials |
-| `+CRED` | P→C | Begin credential block |
-| `<key>=<value>` | P→C | Single credential (one per line) |
-| `+END` | P→C | End credential block |
-| `+OK <n>` | C→P | Acknowledged, received n credentials |
+| `{...}` | P→C | JSON object containing credentials |
+| `+OK` | C→P | Acknowledged, transitioning to MCP |
 | `+ERR <msg>` | C→P | Error, with human-readable reason |
 
-## Value Encoding
+## Disambiguation
 
-- Plain text: `API_KEY=sk-abc123`
-- Base64 (for special chars): `PASSWORD=b64:cGFzc3dvcmQ=`
-- Child decodes `b64:` prefix automatically
+- Lines starting with `+` are SMCP control messages
+- Lines starting with `{` are credential payload (during handshake) or MCP JSON-RPC (after `+OK`)
+- After child sends `+OK`, all stdin/stdout traffic is MCP JSON-RPC
 
 ## Timeouts
 
 | Event | Timeout | Behavior |
 |-------|---------|----------|
-| Child waits for `+CRED` after `+READY` | 5s | Emit `+ERR TIMEOUT`, exit 1 |
+| Child waits for credentials after `+READY` | 5s | Emit `+ERR TIMEOUT\n`, exit 1 |
 | Parent waits for `+READY` | 10s | Kill child, log failure |
 | Parent waits for `+OK`/`+ERR` | 5s | Kill child, log failure |
 
-## Example
+## Example Session
 
 ```
 ← +READY
-→ +CRED
-→ DB_HOST=postgres.local
-→ DB_USER=app
-→ DB_PASS=b64:aHVudGVyMg==
-→ AZURE_STORAGE_KEY=b64:eHl6MTIz...
-→ +END
-← +OK 4
-(stdin closed)
-(child initializes MCP transport)
+→ {"DB_HOST":"postgres.local","DB_USER":"app","DB_PASS":"hunter2"}
+← +OK
+→ {"jsonrpc":"2.0","method":"initialize","params":{},"id":1}
+← {"jsonrpc":"2.0","result":{},"id":1}
 ```
 
-## Child Implementation (Pseudocode)
+## Child Implementation
 
-```
-print("+READY\n")
-flush(stdout)
+**Python:**
+```python
+import sys, json
 
-line = readline(stdin, timeout=5s)
-if line != "+CRED":
-    die("+ERR EXPECTED_CRED")
+print("+READY", flush=True)
 
-creds = {}
-while true:
-    line = readline(stdin, timeout=5s)
-    if line == "+END":
-        break
-    key, value = split(line, "=", 1)
-    if value.startswith("b64:"):
-        value = base64_decode(value[4:])
-    creds[key] = value
+line = sys.stdin.readline()
+try:
+    creds = json.loads(line)
+except:
+    print("+ERR INVALID_JSON", flush=True)
+    sys.exit(1)
 
-print("+OK " + len(creds) + "\n")
-flush(stdout)
-close(stdin)
+print("+OK", flush=True)
 
-# Proceed with normal MCP initialization using creds
+# stdin/stdout now MCP JSON-RPC
+start_mcp_server(creds)
 ```
 
-## Parent Implementation (Pseudocode)
+**TypeScript:**
+```typescript
+import * as readline from 'readline';
 
+const rl = readline.createInterface({ input: process.stdin });
+
+console.log('+READY');
+
+rl.once('line', (line) => {
+    let creds;
+    try {
+        creds = JSON.parse(line);
+    } catch {
+        console.log('+ERR INVALID_JSON');
+        process.exit(1);
+    }
+    console.log('+OK');
+    
+    // stdin/stdout now MCP JSON-RPC
+    startMcpServer(creds);
+});
 ```
-child = spawn("mcp-server --config smcp", stdin=PIPE, stdout=PIPE)
 
-line = child.readline(timeout=10s)
+## Parent Implementation
+
+**Python:**
+```python
+import subprocess, json
+
+child = subprocess.Popen(
+    ["mcp-server", "--smcp"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    text=True
+)
+
+line = child.stdout.readline().strip()
 if line != "+READY":
-    kill(child)
-    die("child didn't send +READY")
+    child.kill()
+    raise Exception("child didn't send +READY")
 
-child.write("+CRED\n")
-for key, value in credentials:
-    if needs_encoding(value):
-        value = "b64:" + base64_encode(value)
-    child.write(key + "=" + value + "\n")
-child.write("+END\n")
-child.flush()
+credentials = {"DB_HOST": "localhost", "DB_PASS": "secret"}
+child.stdin.write(json.dumps(credentials) + "\n")
+child.stdin.flush()
 
-line = child.readline(timeout=5s)
-if not line.startswith("+OK"):
-    kill(child)
-    die("credential injection failed: " + line)
+line = child.stdout.readline().strip()
+if line != "+OK":
+    child.kill()
+    raise Exception(f"credential injection failed: {line}")
 
-child.stdin.close()
-# Child now runs normal MCP protocol on stdin/stdout
+# Child now running MCP, proxy stdin/stdout as needed
 ```
 
 ## Security Considerations
@@ -132,26 +144,34 @@ child.stdin.close()
 2. **Memory Hygiene:** Child should zero credential memory after copying to final destination
 3. **No Persistence:** Child must never write credentials to disk
 4. **Audit Logging:** Parent should log which credentials were sent to which child (keys only, not values)
-5. **Stdin Closure:** Child must close stdin after `+OK` to prevent further injection
 
-## MCP Integration
+## Parent Configuration Example
 
-After SMCP handshake completes:
-- Child's stdin is closed (no longer used for SMCP)
-- MCP transport initializes on a new channel (per MCP spec)
-- Typically: MCP uses fresh stdin/stdout or HTTP
-
-**Option A:** MCP over stdout (stdin closed)  
-**Option B:** MCP over HTTP (child binds port, parent connects)  
-**Option C:** MCP over Unix socket
-
-## Future Extensions
-
-- `+VERSION <n>` — Protocol version negotiation
-- `+REFRESH` — Mid-flight credential rotation (requires keeping stdin open)
-- `+AUDIT <id>` — Correlation ID for logging
-
----
+```json
+{
+    "smcp_servers": [
+        {
+            "name": "azure-storage",
+            "command": "mcp-azure-storage",
+            "args": ["--smcp"],
+            "credentials": {
+                "AZURE_STORAGE_ACCOUNT_NAME": "mystorageaccount",
+                "AZURE_STORAGE_ACCOUNT_KEY": "secretkey"
+            }
+        },
+        {
+            "name": "database",
+            "command": "mcp-postgres",
+            "args": ["--smcp"],
+            "credentials": {
+                "DB_HOST": "postgres.azure.com",
+                "DB_USER": "admin",
+                "DB_PASS": "secret-password"
+            }
+        }
+    ]
+}
+```
 
 ## Quick Reference
 
@@ -162,15 +182,13 @@ Child                          Parent
   │                              │
   ├─── +READY ──────────────────►│
   │                              │
-  │◄───────────────── +CRED ─────┤
-  │◄───────────────── K=V ───────┤
-  │◄───────────────── K=V ───────┤
-  │◄───────────────── +END ──────┤
+  │◄──────── {json} ─────────────┤
   │                              │
-  ├─── +OK 2 ───────────────────►│
+  ├─── +OK ─────────────────────►│
   │                              │
-  │  (stdin closed)              │
+  │  ══════ MCP JSON-RPC ══════  │
   │                              │
-  │  [MCP protocol begins]       │
+  │◄──────── {jsonrpc} ──────────┤
+  ├──────── {jsonrpc} ──────────►│
   ▼                              ▼
 ```
