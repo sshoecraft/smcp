@@ -17,19 +17,16 @@ SMCP defines a simple handshake where a parent process (with access to MSI, Vaul
 
 ```
 Child  → Parent:  +READY
-Parent → Child:   +CRED
-Parent → Child:   DB_PASS=secret
-Parent → Child:   API_KEY=sk-123
-Parent → Child:   +END
-Child  → Parent:  +OK 2
-(stdin closed, MCP proceeds)
+Parent → Child:   {"DB_PASS":"secret","API_KEY":"sk-123"}
+Child  → Parent:  +OK
+── MCP JSON-RPC begins ──
 ```
 
 ## Features
 
-- **Simple:** 5 messages, implementable in ~30 lines
+- **Simple:** 3 messages, implementable in <10 lines
 - **Secure:** No env vars, no CLI args, no disk
-- **Universal:** Line-based protocol, any language
+- **Universal:** Uses built-in JSON parsers (every language has one)
 - **Auditable:** Parent controls credential distribution
 
 ## Specification
