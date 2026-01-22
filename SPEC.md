@@ -115,7 +115,7 @@ rl.once('line', (line) => {
 import subprocess, json
 
 child = subprocess.Popen(
-    ["mcp-server", "--smcp"],
+    ["mcp-server"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     text=True
@@ -153,7 +153,6 @@ if line != "+OK":
         {
             "name": "azure-storage",
             "command": "mcp-azure-storage",
-            "args": ["--smcp"],
             "credentials": {
                 "AZURE_STORAGE_ACCOUNT_NAME": "mystorageaccount",
                 "AZURE_STORAGE_ACCOUNT_KEY": "secretkey"
@@ -162,7 +161,6 @@ if line != "+OK":
         {
             "name": "database",
             "command": "mcp-postgres",
-            "args": ["--smcp"],
             "credentials": {
                 "DB_HOST": "postgres.azure.com",
                 "DB_USER": "admin",
