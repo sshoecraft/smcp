@@ -36,11 +36,11 @@ def create_server(client: PostgresClient) -> FastMCP:
         """
         result = await client.execute_query(sql)
         if "error" in result:
-            return {"success": False, "error": result["error"]}
+            return {"success": "false", "error": result["error"]}
         return {
-            "success": True,
+            "success": "true",
             "rows": json.dumps(result["rows"], default=str),
-            "row_count": result["row_count"]
+            "row_count": str(result["row_count"])
         }
 
     @mcp.tool(
@@ -50,7 +50,7 @@ def create_server(client: PostgresClient) -> FastMCP:
     async def list_tables() -> Dict[str, str]:
         """List all tables in the public schema."""
         tables = await client.list_tables()
-        return {"success": True, "tables": tables}
+        return {"success": "true", "tables": json.dumps(tables)}
 
     @mcp.tool(
         name="get_table_schema",
@@ -67,8 +67,8 @@ def create_server(client: PostgresClient) -> FastMCP:
         """
         schema = await client.get_table_schema(table_name)
         if not schema:
-            return {"success": False, "error": f"Table '{table_name}' not found or has no columns"}
-        return {"success": True, "columns": schema}
+            return {"success": "false", "error": f"Table '{table_name}' not found or has no columns"}
+        return {"success": "true", "columns": json.dumps(schema)}
 
     return mcp
 
