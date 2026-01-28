@@ -26,10 +26,22 @@ The server accepts the following credentials via SMCP JSON:
 | `DB_NAME` | Database name (default: postgres) |
 | `LOG_LEVEL` | Logging level: DEBUG, INFO, WARNING, ERROR (default: INFO) |
 
+## Quick Start with Shepherd
+
+```bash
+shepherd smcp add postgres --command "postgres-smcp-server" --credential "DATABASE_URL=postgresql://user:pass@host:5432/dbname"
+```
+
+Or with individual credentials:
+
+```bash
+shepherd smcp add postgres --command "postgres-smcp-server" --credential "DB_HOST=localhost" --credential "DB_PORT=5432" --credential "DB_USER=postgres" --credential "DB_PASS=..." --credential "DB_NAME=mydb"
+```
+
 ## Usage
 
 ```bash
-smcp-server-postgres
+postgres-smcp-server
 ```
 
 The server performs the SMCP handshake on startup:
@@ -69,7 +81,7 @@ import subprocess
 import json
 
 child = subprocess.Popen(
-    ["smcp-server-postgres"],
+    ["postgres-smcp-server"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     text=True

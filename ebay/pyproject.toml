@@ -1,0 +1,26 @@
+[project]
+name = "ebay-smcp-server"
+version = "0.1.0"
+description = "SMCP-enabled MCP server for eBay Browse API with secure credential injection"
+authors = [
+    { name = "SMCP Project" },
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["ebay", "search", "mcp", "smcp", "model-context-protocol"]
+dependencies = [
+    "mcp>=1.6.0",
+    "requests>=2.28.0",
+    "smcp",
+]
+
+[project.scripts]
+ebay-smcp-server = "ebay_smcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ebay_smcp_server"]

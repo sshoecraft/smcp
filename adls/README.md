@@ -27,10 +27,16 @@ The server accepts the following credentials via SMCP JSON:
 | `DOWNLOAD_ROOT` | No | Local directory for downloads (default: "./downloads") |
 | `LOG_LEVEL` | No | Logging level: DEBUG, INFO, WARNING, ERROR (default: "INFO") |
 
+## Quick Start with Shepherd
+
+```bash
+shepherd smcp add adls --command "adls-smcp-server" --credential "AZURE_STORAGE_ACCOUNT_NAME=mystorageaccount" --credential "AZURE_STORAGE_ACCOUNT_KEY=base64key..."
+```
+
 ## Usage
 
 ```bash
-smcp-server-adls
+adls-smcp-server
 ```
 
 The server performs the SMCP handshake on startup:
@@ -83,7 +89,7 @@ import subprocess
 import json
 
 child = subprocess.Popen(
-    ["smcp-server-adls"],
+    ["adls-smcp-server"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     text=True

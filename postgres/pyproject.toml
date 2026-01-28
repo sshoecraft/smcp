@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-smcp-server-postgres = "postgres_smcp_server.server:main"
+postgres-smcp-server = "postgres_smcp_server.server:main"
 
 [build-system]
 requires = ["hatchling"]

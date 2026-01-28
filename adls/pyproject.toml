@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-smcp-server-adls = "adls_smcp_server.server:main"
+adls-smcp-server = "adls_smcp_server.server:main"
 
 [build-system]
 requires = ["hatchling"]
