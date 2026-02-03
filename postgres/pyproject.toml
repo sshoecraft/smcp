@@ -1,6 +1,6 @@
 [project]
 name = "postgres-smcp-server"
-version = "0.1.0"
+version = "0.2.0"
 description = "SMCP-enabled MCP server for PostgreSQL with secure credential injection"
 authors = [
     { name = "SMCP Project" },

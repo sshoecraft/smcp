@@ -79,14 +79,19 @@ class PostgresClient:
         """Get a new database connection."""
         return psycopg.connect(self._conninfo, row_factory=dict_row)
 
-    async def list_tables(self) -> List[str]:
-        """List all tables in the public schema."""
+    async def list_tables(self, schema: str = "public") -> List[str]:
+        """List all tables in the specified schema.
+
+        Args:
+            schema: The schema to list tables from (default: public)
+        """
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
                         "SELECT table_name FROM information_schema.tables "
-                        "WHERE table_schema = 'public'"
+                        "WHERE table_schema = %s",
+                        (schema,)
                     )
                     return [row["table_name"] for row in cur.fetchall()]
         except Exception as e:

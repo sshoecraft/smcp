@@ -45,11 +45,15 @@ def create_server(client: PostgresClient) -> FastMCP:
 
     @mcp.tool(
         name="list_tables",
-        description="List all tables in the public schema"
+        description="List all tables in a schema"
     )
-    async def list_tables() -> Dict[str, str]:
-        """List all tables in the public schema."""
-        tables = await client.list_tables()
+    async def list_tables(schema: str = "public") -> Dict[str, str]:
+        """List all tables in the specified schema.
+
+        Args:
+            schema: The schema to list tables from (default: public)
+        """
+        tables = await client.list_tables(schema)
         return {"success": "true", "tables": json.dumps(tables)}
 
     @mcp.tool(
