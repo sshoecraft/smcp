@@ -1,31 +1,10 @@
 """Filesystem-related MCP tools."""
 
+import json
 import logging
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict
+from typing import Dict
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class FilesystemListResponse:
-    success: bool
-    filesystems: List[str] = field(default_factory=list)
-    error: str = ""
-
-
-@dataclass
-class CreateFilesystemResponse:
-    name: str
-    success: bool
-    error: str = ""
-
-
-@dataclass
-class DeleteFilesystemResponse:
-    name: str
-    success: bool
-    error: str = ""
 
 
 def register_filesystem_tools(mcp):
@@ -39,19 +18,18 @@ def register_filesystem_tools(mcp):
         """List all filesystems in the storage account."""
         try:
             fs = await mcp.client.list_filesystems()
-            response = FilesystemListResponse(
-                success=True,
-                filesystems=fs,
-                error=""
-            )
-            return asdict(response)
+            return {
+                "success": "true",
+                "filesystems": json.dumps(fs),
+                "error": ""
+            }
         except Exception as e:
             logger.error(f"Error listing filesystems: {e}")
-            response = FilesystemListResponse(
-                success=False,
-                error=str(e)
-            )
-            return asdict(response)
+            return {
+                "success": "false",
+                "filesystems": "[]",
+                "error": str(e)
+            }
 
     @mcp.tool(
         name="create_filesystem",
@@ -60,29 +38,26 @@ def register_filesystem_tools(mcp):
     async def create_filesystem(name: str) -> Dict[str, str]:
         """Create a new filesystem in the storage account."""
         if mcp.client.read_only:
-            response = CreateFilesystemResponse(
-                name=name,
-                success=False,
-                error="Cannot create filesystem in read-only mode"
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "false",
+                "error": "Cannot create filesystem in read-only mode"
+            }
 
         try:
             success = await mcp.client.create_container(name)
-            response = CreateFilesystemResponse(
-                name=name,
-                success=success,
-                error="" if success else "Failed to create filesystem"
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "true" if success else "false",
+                "error": "" if success else "Failed to create filesystem"
+            }
         except Exception as e:
             logger.error(f"Error creating filesystem {name}: {e}")
-            response = CreateFilesystemResponse(
-                name=name,
-                success=False,
-                error=str(e)
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "false",
+                "error": str(e)
+            }
 
     @mcp.tool(
         name="delete_filesystem",
@@ -91,26 +66,23 @@ def register_filesystem_tools(mcp):
     async def delete_filesystem(name: str) -> Dict[str, str]:
         """Delete a filesystem from the storage account."""
         if mcp.client.read_only:
-            response = DeleteFilesystemResponse(
-                name=name,
-                success=False,
-                error="Cannot delete filesystem in read-only mode"
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "false",
+                "error": "Cannot delete filesystem in read-only mode"
+            }
 
         try:
             success = await mcp.client.delete_filesystem(name)
-            response = DeleteFilesystemResponse(
-                name=name,
-                success=success,
-                error="" if success else "Failed to delete filesystem"
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "true" if success else "false",
+                "error": "" if success else "Failed to delete filesystem"
+            }
         except Exception as e:
             logger.error(f"Error deleting filesystem {name}: {e}")
-            response = DeleteFilesystemResponse(
-                name=name,
-                success=False,
-                error=str(e)
-            )
-            return asdict(response)
+            return {
+                "name": name,
+                "success": "false",
+                "error": str(e)
+            }
