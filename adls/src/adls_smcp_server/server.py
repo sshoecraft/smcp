@@ -4,7 +4,7 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from adls_smcp_server.client import ADLS2Client, ADLS2Config
 from adls_smcp_server.tools import register_all_tools
@@ -15,9 +15,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "AZURE_STORAGE_ACCOUNT_NAME": "Azure Storage account name"
+    },
+    "optional": {
+        "AZURE_STORAGE_ACCOUNT_KEY": "Azure Storage account key",
+        "READ_ONLY_MODE": "Read-only mode (default: true)",
+        "UPLOAD_ROOT": "Local upload root directory (default: ./uploads)",
+        "DOWNLOAD_ROOT": "Local download root directory (default: ./downloads)",
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
+
 
 def main():
     """Main entry point for the ADLS2 SMCP service."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     try:
         # Perform SMCP handshake to get credentials
         creds = smcp_handshake()

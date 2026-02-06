@@ -1,6 +1,6 @@
 [project]
 name = "smcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "SMCP (Secure MCP Credential Protocol) - Shared handshake library"
 authors = [
     { name = "SMCP Project" },

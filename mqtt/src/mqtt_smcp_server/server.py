@@ -4,7 +4,7 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from mqtt_smcp_server.client import MQTTClient, MQTTConfig
 from mqtt_smcp_server.tools import register_tools
@@ -15,9 +15,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "MQTT_BROKER": "MQTT broker hostname or IP"
+    },
+    "optional": {
+        "MQTT_PORT": "MQTT broker port (default: 1883)",
+        "MQTT_USER": "MQTT username",
+        "MQTT_PASS": "MQTT password",
+        "MQTT_CLIENT_ID": "MQTT client ID (auto-generated if not provided)",
+        "MQTT_TLS": "Use TLS connection (default: false)",
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
+
 
 def main():
     """Main entry point for the MQTT SMCP service."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     try:
         # Perform SMCP handshake to get credentials
         creds = smcp_handshake()

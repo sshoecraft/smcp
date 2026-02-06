@@ -4,7 +4,7 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from ecobee_smcp_server.client import EcobeeClient, EcobeeConfig
 from ecobee_smcp_server.tools import register_all_tools
@@ -15,9 +15,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "ECOBEE_API_KEY": "Ecobee API key",
+        "ACCESS_TOKEN": "Ecobee OAuth access token",
+        "REFRESH_TOKEN": "Ecobee OAuth refresh token"
+    },
+    "optional": {
+        "THERMOSTAT_ID": "Specific thermostat ID to control",
+        "READ_ONLY_MODE": "Read-only mode (default: true)",
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
+
 
 def main():
     """Main entry point for the Ecobee SMCP service."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     try:
         # Perform SMCP handshake to get credentials
         creds = smcp_handshake()

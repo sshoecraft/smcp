@@ -4,7 +4,7 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from ebay_smcp_server.client import EbayClient, EbayConfig
 from ebay_smcp_server.tools import register_tools
@@ -15,9 +15,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "EBAY_CLIENT_ID": "eBay application client ID",
+        "EBAY_CLIENT_SECRET": "eBay application client secret"
+    },
+    "optional": {
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
+
 
 def main():
     """Main entry point for the eBay SMCP service."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     try:
         # Perform SMCP handshake to get credentials
         creds = smcp_handshake()

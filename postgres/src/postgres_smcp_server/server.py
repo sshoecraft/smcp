@@ -6,7 +6,7 @@ import sys
 from typing import Dict
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from postgres_smcp_server.client import PostgresClient, PostgresConfig
 
@@ -15,6 +15,19 @@ logging.basicConfig(
     format="%(asctime)s [%(name)s - %(levelname)s] - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+CREDENTIALS_SCHEMA = {
+    "required": {},
+    "optional": {
+        "DATABASE_URL": "Full database URL (takes priority over individual parameters)",
+        "DB_HOST": "Database hostname (default: localhost)",
+        "DB_PORT": "Database port (default: 5432)",
+        "DB_USER": "Database username (default: postgres)",
+        "DB_PASS": "Database password",
+        "DB_NAME": "Database name (default: postgres)",
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
 
 
 def create_server(client: PostgresClient) -> FastMCP:
@@ -79,6 +92,8 @@ def create_server(client: PostgresClient) -> FastMCP:
 
 def main():
     """Main entry point for the PostgreSQL SMCP service."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     try:
         # Perform SMCP handshake to get credentials
         creds = smcp_handshake()

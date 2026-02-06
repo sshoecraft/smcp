@@ -1,6 +1,6 @@
 [project]
 name = "ebay-smcp-server"
-version = "0.1.0"
+version = "0.1.1"
 description = "SMCP-enabled MCP server for eBay Browse API with secure credential injection"
 authors = [
     { name = "SMCP Project" },

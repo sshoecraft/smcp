@@ -1,6 +1,6 @@
 [project]
 name = "adls-smcp-server"
-version = "0.2.0"
+version = "0.2.1"
 description = "SMCP-enabled MCP server for Azure Data Lake Storage Gen2"
 authors = [
     { name = "SMCP Project" },

@@ -4,10 +4,21 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from alpaca_smcp_server.client import AlpacaClient, AlpacaConfig
 from alpaca_smcp_server.tools import register_tools
+
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "ALPACA_API_KEY": "Alpaca API key",
+        "ALPACA_SECRET_KEY": "Alpaca API secret key"
+    },
+    "optional": {
+        "ALPACA_PAPER": "Use paper trading (default: true)",
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
 
 
 def setup_logging(level: str = "INFO") -> None:
@@ -22,6 +33,8 @@ def setup_logging(level: str = "INFO") -> None:
 
 def main() -> None:
     """Main entry point for the Alpaca SMCP server."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     # Perform SMCP handshake to receive credentials
     creds = smcp_handshake()
 

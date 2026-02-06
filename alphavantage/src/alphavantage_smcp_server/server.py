@@ -4,10 +4,19 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
-from smcp import handshake as smcp_handshake
+from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from alphavantage_smcp_server.client import AlphaVantageClient, AlphaVantageConfig
 from alphavantage_smcp_server.tools import register_tools
+
+CREDENTIALS_SCHEMA = {
+    "required": {
+        "ALPHAVANTAGE_API_KEY": "Alpha Vantage API key"
+    },
+    "optional": {
+        "LOG_LEVEL": "Logging level (default: INFO)"
+    }
+}
 
 
 def setup_logging(level: str = "INFO") -> None:
@@ -22,6 +31,8 @@ def setup_logging(level: str = "INFO") -> None:
 
 def main() -> None:
     """Main entry point for the Alpha Vantage SMCP server."""
+    check_credentials_schema(CREDENTIALS_SCHEMA)
+
     # Perform SMCP handshake to receive credentials
     creds = smcp_handshake()
 
