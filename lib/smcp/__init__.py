@@ -1,10 +1,14 @@
 """SMCP (Secure MCP Credential Protocol) - Shared handshake implementation."""
 
+import os
 import sys
 import json
-from typing import Dict, Any, Optional
+import logging
+from typing import Dict, Any
 
 __version__ = "0.3.0"
+
+logger = logging.getLogger(__name__)
 
 
 def print_credentials_schema(schema: Dict[str, Any]) -> None:
@@ -44,9 +48,18 @@ def check_credentials_schema(schema: Dict[str, Any]) -> None:
         print_credentials_schema(schema)
 
 
+def is_insecure() -> bool:
+    """Check if --insecure mode was requested via CLI args."""
+    return "--insecure" in sys.argv
+
+
 def handshake() -> Dict[str, str]:
     """
     Perform SMCP handshake to receive credentials securely via stdin/stdout.
+
+    If --insecure is passed on the command line, the handshake is skipped
+    and credentials are read from environment variables instead. This allows
+    SMCP servers to run as standard MCP servers (e.g., with Claude Code).
 
     Protocol (v0.2):
         Child  -> Parent:  +READY
@@ -60,6 +73,10 @@ def handshake() -> Dict[str, str]:
     Raises:
         RuntimeError: If handshake fails
     """
+    if is_insecure():
+        logger.warning("Running in --insecure mode: credentials from environment variables")
+        return dict(os.environ)
+
     # Send +READY
     print("+READY", flush=True)
 
