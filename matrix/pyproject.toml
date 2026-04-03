@@ -1,6 +1,6 @@
 [project]
 name = "matrix-smcp-server"
-version = "0.1.0"
+version = "0.3.0"
 description = "SMCP-enabled MCP server for Matrix with secure credential injection"
 authors = [
     { name = "SMCP Project" },
@@ -12,6 +12,7 @@ keywords = ["matrix", "mcp", "smcp", "model-context-protocol", "chat"]
 dependencies = [
     "mcp>=1.6.0",
     "matrix-nio>=0.24.0",
+    "aiohttp>=3.9.0",
     "smcp",
 ]
 

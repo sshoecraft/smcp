@@ -3,7 +3,9 @@
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Any, Optional
+from urllib.parse import quote
 
+import aiohttp
 from nio import (
     AsyncClient,
     WhoamiResponse,
@@ -60,7 +62,9 @@ class MatrixClient:
         self.nio.access_token = config.access_token
         self.sync_token = ""
 
-    async def _get_sync_token(self) -> str:
+    # ── Helpers ──────────────────────────────────────────────────────
+
+    async def get_sync_token(self) -> str:
         """Get a sync token for pagination, doing a lightweight sync if needed."""
         if not self.sync_token:
             filter_dict = {"room": {"timeline": {"limit": 1}}}
@@ -70,6 +74,37 @@ class MatrixClient:
             else:
                 logger.error(f"Sync failed: {getattr(resp, 'message', str(resp))}")
         return self.sync_token
+
+    async def admin_request(self, method: str, path: str,
+                             body: Optional[Dict] = None,
+                             params: Optional[Dict] = None) -> Dict[str, Any]:
+        """Make a request to the Synapse Admin API.
+
+        Args:
+            method: HTTP method (GET, POST, PUT, DELETE)
+            path: API path (e.g., /_synapse/admin/v1/rooms)
+            body: Optional JSON body
+            params: Optional query parameters
+        """
+        base = self.config.homeserver.rstrip("/")
+        url = f"{base}{path}"
+        headers = {
+            "Authorization": f"Bearer {self.nio.access_token}",
+            "Content-Type": "application/json",
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.request(method, url, headers=headers,
+                                           json=body, params=params) as resp:
+                    if resp.status in (200, 201):
+                        return await resp.json()
+                    else:
+                        text = await resp.text()
+                        return {"error": f"HTTP {resp.status}: {text}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+    # ── Client API: Connection ──────────────────────────────────────
 
     async def verify_connection(self) -> Dict[str, Any]:
         """Verify the connection and access token are valid."""
@@ -83,6 +118,8 @@ class MatrixClient:
             return {"error": getattr(resp, "message", str(resp))}
         except Exception as e:
             return {"error": str(e)}
+
+    # ── Client API: Messaging ───────────────────────────────────────
 
     async def send_message(self, room_id: str, body: str, html: str = "") -> Dict[str, Any]:
         """Send a text message to a room."""
@@ -110,7 +147,7 @@ class MatrixClient:
     async def read_messages(self, room_id: str, limit: int = 20) -> Dict[str, Any]:
         """Read recent messages from a room."""
         try:
-            token = await self._get_sync_token()
+            token = await self.get_sync_token()
             if not token:
                 return {"error": "Failed to obtain sync token for pagination"}
 
@@ -163,10 +200,12 @@ class MatrixClient:
         except Exception as e:
             return {"error": str(e)}
 
+    # ── Client API: Rooms ───────────────────────────────────────────
+
     async def list_rooms(self) -> Dict[str, Any]:
         """List joined rooms."""
         try:
-            await self._get_sync_token()
+            await self.get_sync_token()
             resp = await self.nio.joined_rooms()
             if isinstance(resp, JoinedRoomsResponse):
                 rooms = []
@@ -263,6 +302,8 @@ class MatrixClient:
         except Exception as e:
             return {"error": str(e)}
 
+    # ── Client API: Users ───────────────────────────────────────────
+
     async def invite_user(self, room_id: str, user_id: str) -> Dict[str, Any]:
         """Invite a user to a room."""
         try:
@@ -313,6 +354,169 @@ class MatrixClient:
             return {"error": getattr(resp, "message", str(resp))}
         except Exception as e:
             return {"error": str(e)}
+
+    # ── Admin API: Rooms ────────────────────────────────────────────
+
+    async def destroy_room(self, room_id: str, block: bool = False,
+                           purge: bool = True, force_purge: bool = False) -> Dict[str, Any]:
+        """Destroy a room via Synapse Admin API."""
+        body = {"block": block, "purge": purge, "force_purge": force_purge}
+        result = await self.admin_request("DELETE", f"/_synapse/admin/v2/rooms/{room_id}", body=body)
+        if "error" in result:
+            return result
+        return {"delete_id": result.get("delete_id", ""), "room_id": room_id}
+
+    async def list_all_rooms(self, order_by: str = "name", direction: str = "f",
+                             search_term: str = "", limit: int = 100,
+                             offset: int = 0) -> Dict[str, Any]:
+        """List all rooms on the server via Synapse Admin API."""
+        params = {"order_by": order_by, "dir": direction, "limit": str(limit), "from": str(offset)}
+        if search_term:
+            params["search_term"] = search_term
+        return await self.admin_request("GET", "/_synapse/admin/v1/rooms", params=params)
+
+    async def get_room_details(self, room_id: str) -> Dict[str, Any]:
+        """Get detailed room info via Synapse Admin API."""
+        return await self.admin_request("GET", f"/_synapse/admin/v1/rooms/{room_id}")
+
+    async def block_room(self, room_id: str, block: bool = True) -> Dict[str, Any]:
+        """Block or unblock a room via Synapse Admin API."""
+        return await self.admin_request("PUT", f"/_synapse/admin/v1/rooms/{room_id}/block",
+                                         body={"block": block})
+
+    async def make_room_admin(self, room_id: str, user_id: str = "") -> Dict[str, Any]:
+        """Grant a user admin privileges in a room via Synapse Admin API."""
+        body = {}
+        if user_id:
+            body["user_id"] = user_id
+        return await self.admin_request("POST", f"/_synapse/admin/v1/rooms/{room_id}/make_room_admin",
+                                         body=body)
+
+    async def purge_history(self, room_id: str, purge_up_to_ts: int) -> Dict[str, Any]:
+        """Purge room history up to a timestamp via Synapse Admin API."""
+        body = {"purge_up_to_ts": purge_up_to_ts}
+        return await self.admin_request("POST", f"/_synapse/admin/v1/purge_history/{room_id}",
+                                         body=body)
+
+    # ── Admin API: Users ────────────────────────────────────────────
+
+    async def get_user_admin(self, user_id: str) -> Dict[str, Any]:
+        """Get user account info via Synapse Admin API."""
+        return await self.admin_request("GET", f"/_synapse/admin/v2/users/{quote(user_id, safe='')}")
+
+    async def modify_user(self, user_id: str, displayname: str = "", admin: Optional[bool] = None,
+                          deactivated: Optional[bool] = None, password: str = "",
+                          avatar_url: str = "", threepids: Optional[List[Dict]] = None) -> Dict[str, Any]:
+        """Modify a user account via Synapse Admin API."""
+        body: Dict[str, Any] = {}
+        if displayname:
+            body["displayname"] = displayname
+        if admin is not None:
+            body["admin"] = admin
+        if deactivated is not None:
+            body["deactivated"] = deactivated
+        if password:
+            body["password"] = password
+        if avatar_url:
+            body["avatar_url"] = avatar_url
+        if threepids is not None:
+            body["threepids"] = threepids
+        return await self.admin_request("PUT", f"/_synapse/admin/v2/users/{quote(user_id, safe='')}",
+                                         body=body)
+
+    async def deactivate_user(self, user_id: str, erase: bool = False) -> Dict[str, Any]:
+        """Deactivate a user account via Synapse Admin API."""
+        body = {"erase": erase}
+        return await self.admin_request("POST", f"/_synapse/admin/v1/deactivate/{quote(user_id, safe='')}",
+                                         body=body)
+
+    async def reset_password(self, user_id: str, new_password: str,
+                             logout_devices: bool = True) -> Dict[str, Any]:
+        """Reset a user's password via Synapse Admin API."""
+        body = {"new_password": new_password, "logout_devices": logout_devices}
+        return await self.admin_request("POST",
+                                         f"/_synapse/admin/v1/reset_password/{quote(user_id, safe='')}",
+                                         body=body)
+
+    async def whois_user(self, user_id: str) -> Dict[str, Any]:
+        """Get active sessions for a user via Synapse Admin API."""
+        return await self.admin_request("GET", f"/_synapse/admin/v1/whois/{quote(user_id, safe='')}")
+
+    async def list_user_devices(self, user_id: str) -> Dict[str, Any]:
+        """List all devices for a user via Synapse Admin API."""
+        return await self.admin_request("GET",
+                                         f"/_synapse/admin/v2/users/{quote(user_id, safe='')}/devices")
+
+    async def delete_user_device(self, user_id: str, device_id: str) -> Dict[str, Any]:
+        """Delete a specific device for a user via Synapse Admin API."""
+        return await self.admin_request("DELETE",
+                                         f"/_synapse/admin/v2/users/{quote(user_id, safe='')}/devices/{device_id}")
+
+    # ── Admin API: Server ───────────────────────────────────────────
+
+    async def get_server_version(self) -> Dict[str, Any]:
+        """Get Synapse server version via Admin API."""
+        return await self.admin_request("GET", "/_synapse/admin/v1/server_version")
+
+    async def list_event_reports(self, limit: int = 100, offset: int = 0) -> Dict[str, Any]:
+        """List event reports via Synapse Admin API."""
+        params = {"limit": str(limit), "from": str(offset)}
+        return await self.admin_request("GET", "/_synapse/admin/v1/event_reports", params=params)
+
+    async def get_user_media_stats(self, order_by: str = "media_length",
+                                   direction: str = "b", search_term: str = "",
+                                   limit: int = 100, offset: int = 0) -> Dict[str, Any]:
+        """Get per-user media usage statistics via Synapse Admin API."""
+        params = {"order_by": order_by, "dir": direction,
+                  "limit": str(limit), "from": str(offset)}
+        if search_term:
+            params["search_term"] = search_term
+        return await self.admin_request("GET", "/_synapse/admin/v1/statistics/users/media",
+                                         params=params)
+
+    # ── Admin API: Registration Tokens ──────────────────────────────
+
+    async def create_registration_token(self, token: str = "",
+                                        uses_allowed: Optional[int] = None,
+                                        expiry_time: Optional[int] = None) -> Dict[str, Any]:
+        """Create a registration token via Synapse Admin API."""
+        body: Dict[str, Any] = {}
+        if token:
+            body["token"] = token
+        if uses_allowed is not None:
+            body["uses_allowed"] = uses_allowed
+        if expiry_time is not None:
+            body["expiry_time"] = expiry_time
+        return await self.admin_request("POST", "/_synapse/admin/v1/registration_tokens/new",
+                                         body=body)
+
+    async def list_registration_tokens(self, valid: Optional[bool] = None) -> Dict[str, Any]:
+        """List registration tokens via Synapse Admin API."""
+        params = {}
+        if valid is not None:
+            params["valid"] = "true" if valid else "false"
+        return await self.admin_request("GET", "/_synapse/admin/v1/registration_tokens",
+                                         params=params)
+
+    async def revoke_registration_token(self, token: str) -> Dict[str, Any]:
+        """Delete a registration token via Synapse Admin API."""
+        return await self.admin_request("DELETE",
+                                         f"/_synapse/admin/v1/registration_tokens/{token}")
+
+    # ── Admin API: Media ────────────────────────────────────────────
+
+    async def delete_media(self, server_name: str, media_id: str) -> Dict[str, Any]:
+        """Delete a specific media item via Synapse Admin API."""
+        return await self.admin_request("DELETE",
+                                         f"/_synapse/admin/v1/media/{server_name}/{media_id}")
+
+    async def purge_media_cache(self, before_ts: int) -> Dict[str, Any]:
+        """Purge cached remote media older than timestamp via Synapse Admin API."""
+        params = {"before_ts": str(before_ts)}
+        return await self.admin_request("POST", "/_synapse/admin/v1/purge_media_cache",
+                                         params=params)
+
+    # ── Lifecycle ───────────────────────────────────────────────────
 
     async def close(self):
         """Close the client session."""
