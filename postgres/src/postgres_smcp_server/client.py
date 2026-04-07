@@ -39,14 +39,14 @@ class PostgresConfig:
     def from_url(cls, url: str) -> "PostgresConfig":
         """Parse a PostgreSQL connection URL."""
         # Handle postgresql:// or postgres:// URLs
-        from urllib.parse import urlparse
+        from urllib.parse import urlparse, unquote
         parsed = urlparse(url)
 
         return cls(
             host=parsed.hostname or "localhost",
             port=parsed.port or 5432,
-            user=parsed.username or "postgres",
-            password=parsed.password or "",
+            user=unquote(parsed.username) if parsed.username else "postgres",
+            password=unquote(parsed.password) if parsed.password else "",
             database=parsed.path.lstrip("/") or "postgres",
         )
 
