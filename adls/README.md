@@ -9,7 +9,10 @@ This server provides access to Azure Data Lake Storage Gen2 via the Model Contex
 ## Features
 
 - **Secure Credentials**: Receives Azure credentials via SMCP handshake (no env vars, no config files, no disk)
-- **Filesystem Operations**: List, create, delete filesystems
+- **Blob Container Operations**: List, create, delete blob containers
+- **Blob Operations**: List, upload, download, delete blobs; get blob properties
+- **SAS URL Generation**: Generate time-limited, permission-scoped SAS URLs for blob download/access
+- **Filesystem Operations**: List, create, delete ADLS2 filesystems
 - **Directory Operations**: Create, delete, rename, list directories
 - **File Operations**: Upload, download, rename files; get/set properties and metadata
 - **Read-Only Mode**: Optional read-only mode for safe browsing
@@ -22,9 +25,7 @@ The server accepts the following credentials via SMCP JSON:
 |------------|----------|-------------|
 | `AZURE_STORAGE_ACCOUNT_NAME` | Yes | Azure storage account name |
 | `AZURE_STORAGE_ACCOUNT_KEY` | No | Storage account key (uses DefaultAzureCredential if not provided) |
-| `READ_ONLY_MODE` | No | Set to "false" to enable write operations (default: "true") |
-| `UPLOAD_ROOT` | No | Local directory for uploads (default: "./uploads") |
-| `DOWNLOAD_ROOT` | No | Local directory for downloads (default: "./downloads") |
+| `READ_ONLY_MODE` | No | Set to "true" to disable write operations (default: "false") |
 | `LOG_LEVEL` | No | Logging level: DEBUG, INFO, WARNING, ERROR (default: "INFO") |
 
 ## Quick Start with Shepherd
@@ -50,6 +51,25 @@ The server performs the SMCP handshake on startup:
 ```
 
 ## MCP Tools
+
+### Blob Container Tools
+
+- **list_containers**: List all blob containers in the storage account
+- **create_container**: Create a new blob container
+- **delete_container**: Delete a blob container
+
+### Blob Tools
+
+- **list_blobs**: List blobs in a container, optionally filtered by prefix
+- **get_blob_properties**: Get blob properties (size, timestamps, content type, etc.)
+- **upload_blob**: Upload a local file as a blob
+- **upload_blob_content**: Upload text or base64 content directly as a blob (no local file needed)
+- **download_blob**: Download a blob
+- **delete_blob**: Delete a blob
+
+### SAS URL Tools
+
+- **generate_sas_url**: Generate a time-limited SAS URL for a blob (parameters: container, blob_path, expiry_minutes, permissions)
 
 ### Filesystem Tools
 

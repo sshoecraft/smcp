@@ -4,6 +4,8 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from importlib.metadata import version as pkg_version
+
 from smcp import handshake as smcp_handshake, check_credentials_schema
 
 from adls_smcp_server.client import ADLS2Client, ADLS2Config
@@ -48,6 +50,14 @@ def main():
         # Initialize MCP server
         mcp = FastMCP("ADLS2SMCP")
         mcp.client = client
+
+        # Register version tool
+        @mcp.tool(
+            name="adls_version",
+            description="Return the running version of the ADLS SMCP server"
+        )
+        async def adls_version() -> dict:
+            return {"version": pkg_version("adls-smcp-server")}
 
         # Register all MCP tools
         register_all_tools(mcp)

@@ -1,6 +1,6 @@
 [project]
 name = "adls-smcp-server"
-version = "0.2.1"
+version = "0.5.1"
 description = "SMCP-enabled MCP server for Azure Data Lake Storage Gen2"
 authors = [
     { name = "SMCP Project" },
@@ -11,6 +11,7 @@ license = {text = "MIT"}
 keywords = ["azure", "adls", "mcp", "smcp", "model-context-protocol"]
 dependencies = [
     "azure-identity>=1.21.0",
+    "azure-storage-blob>=12.25.0",
     "azure-storage-file-datalake>=12.20.0",
     "mcp>=1.6.0",
     "smcp",
