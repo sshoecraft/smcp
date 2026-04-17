@@ -1,0 +1,10 @@
+azure-storage-blob==12.19.0
+azure-storage-file-datalake==12.13.0
+alpaca-trade-api==3.2.0
+pandas==2.2.2
+numpy==1.26.4
+requests==2.32.3
+python-dotenv==1.0.1
+beautifulsoup4==4.12.3
+lxml==5.2.2
+urllib3==1.26.18
