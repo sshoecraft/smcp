@@ -20,7 +20,7 @@ PIP := $(if $(VENV_DIR),$(VENV_DIR)/bin/pip3,pip3)
 LIB_PKG := lib
 
 # Server packages (each has its own pyproject.toml)
-SERVER_PKGS := adls alpaca alphavantage ebay ecobee econet homekit influxdb \
+SERVER_PKGS := adls alpaca alphavantage ask ebay ecobee econet homekit influxdb \
                matrix moltbook mqtt postgres sharepoint
 
 ALL_PKGS := $(LIB_PKG) $(SERVER_PKGS)

@@ -1,0 +1,26 @@
+[project]
+name = "ask-smcp-server"
+version = "0.1.3"
+description = "SMCP-enabled MCP server that exposes an external LLM provider (Gemini, OpenAI, Anthropic) as a single 'query' tool"
+authors = [
+    { name = "SMCP Project" },
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = ["ask", "llm", "mcp", "smcp", "gemini", "openai", "anthropic", "model-context-protocol"]
+dependencies = [
+    "mcp>=1.6.0",
+    "httpx>=0.27",
+    "smcp",
+]
+
+[project.scripts]
+ask-smcp-server = "ask_smcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ask_smcp_server"]
