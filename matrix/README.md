@@ -39,7 +39,7 @@ The response contains an `access_token` field.
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add matrix --command "matrix-smcp-server" --credential "MATRIX_HOMESERVER=https://matrix.example.com" --credential "MATRIX_ACCESS_TOKEN=syt_..."
+shepherd smcp add matrix matrix-smcp-server --cred MATRIX_HOMESERVER=https://matrix.example.com --cred MATRIX_ACCESS_TOKEN=syt_...
 ```
 
 ## Usage

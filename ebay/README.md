@@ -24,7 +24,7 @@ This server provides access to eBay's Browse API for searching listings and retr
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add ebay --command "ebay-smcp-server" --credential "EBAY_CLIENT_ID=..." --credential "EBAY_CLIENT_SECRET=..."
+shepherd smcp add ebay ebay-smcp-server --cred EBAY_CLIENT_ID=... --cred EBAY_CLIENT_SECRET=...
 ```
 
 ## Usage

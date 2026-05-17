@@ -36,7 +36,7 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add ecobee --command "ecobee-smcp-server" --credential "ECOBEE_API_KEY=..." --credential "ACCESS_TOKEN=..." --credential "REFRESH_TOKEN=..." --credential "THERMOSTAT_ID=123456789012"
+shepherd smcp add ecobee ecobee-smcp-server --cred ECOBEE_API_KEY=... --cred ACCESS_TOKEN=... --cred REFRESH_TOKEN=... --cred THERMOSTAT_ID=123456789012
 ```
 
 ## Usage

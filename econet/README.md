@@ -44,7 +44,7 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add econet --command "econet-smcp-server" --credential "ECONET_EMAIL=user@example.com" --credential "ECONET_PASSWORD=..."
+shepherd smcp add econet econet-smcp-server --cred ECONET_EMAIL=user@example.com --cred ECONET_PASSWORD=...
 ```
 
 ## Usage

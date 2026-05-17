@@ -45,7 +45,7 @@ Premium plans available for higher limits.
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add alphavantage --command "alphavantage-smcp-server" --credential "ALPHAVANTAGE_API_KEY=your-api-key"
+shepherd smcp add alphavantage alphavantage-smcp-server --cred ALPHAVANTAGE_API_KEY=your-api-key
 ```
 
 ## MCP Tools

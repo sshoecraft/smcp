@@ -40,10 +40,10 @@ Get API keys at: https://app.alpaca.markets/
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add alpaca --command "alpaca-smcp-server" \
-  --credential "ALPACA_API_KEY=PK..." \
-  --credential "ALPACA_SECRET_KEY=..." \
-  --credential "ALPACA_PAPER=true"
+shepherd smcp add alpaca alpaca-smcp-server \
+  --cred ALPACA_API_KEY=PK... \
+  --cred ALPACA_SECRET_KEY=... \
+  --cred ALPACA_PAPER=true
 ```
 
 ## MCP Tools (47 tools)

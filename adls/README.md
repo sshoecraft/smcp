@@ -31,7 +31,7 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add adls --command "adls-smcp-server" --credential "AZURE_STORAGE_ACCOUNT_NAME=mystorageaccount" --credential "AZURE_STORAGE_ACCOUNT_KEY=base64key..."
+shepherd smcp add adls adls-smcp-server --cred AZURE_STORAGE_ACCOUNT_NAME=mystorageaccount --cred AZURE_STORAGE_ACCOUNT_KEY=base64key...
 ```
 
 ## Usage

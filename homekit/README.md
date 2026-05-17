@@ -26,7 +26,7 @@ This server provides local control of HomeKit devices via the Model Context Prot
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add homekit --command "homekit-smcp-server" --credential 'HOMEKIT_PAIRING_DATA={"AccessoryPairingID":"...","AccessoryLTPK":"...","iOSPairingId":"...","iOSDeviceLTSK":"...","iOSDeviceLTPK":"...","AccessoryIP":"192.168.1.x","AccessoryPort":21063}'
+shepherd smcp add homekit homekit-smcp-server --cred 'HOMEKIT_PAIRING_DATA={"AccessoryPairingID":"...","AccessoryLTPK":"...","iOSPairingId":"...","iOSDeviceLTSK":"...","iOSDeviceLTPK":"...","AccessoryIP":"192.168.1.x","AccessoryPort":21063}'
 ```
 
 ## Initial Setup: Pairing

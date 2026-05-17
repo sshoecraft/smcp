@@ -30,7 +30,7 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add mqtt --command "mqtt-smcp-server" --credential "MQTT_BROKER=192.168.1.100" --credential "MQTT_PORT=1883" --credential "MQTT_USER=mqttuser" --credential "MQTT_PASS=..."
+shepherd smcp add mqtt mqtt-smcp-server --cred MQTT_BROKER=192.168.1.100 --cred MQTT_PORT=1883 --cred MQTT_USER=mqttuser --cred MQTT_PASS=...
 ```
 
 ## Usage

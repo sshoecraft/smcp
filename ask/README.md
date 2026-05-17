@@ -65,17 +65,17 @@ mcp__ask_grok__query
 ## Usage with Shepherd (proper SMCP — no env vars, no disk)
 
 ```
-shepherd smcp add ask_gemini --command "ask-smcp-server" \
-    --credential ASK_TYPE=gemini --credential ASK_API_KEY=AIza...
+shepherd smcp add ask_gemini ask-smcp-server \
+    --cred ASK_TYPE=gemini --cred ASK_API_KEY=AIza...
 
-shepherd smcp add ask_opus --command "ask-smcp-server" \
-    --credential ASK_TYPE=anthropic --credential ASK_API_KEY=sk-ant-... \
-    --credential ASK_MODEL=claude-opus-4-7
+shepherd smcp add ask_opus ask-smcp-server \
+    --cred ASK_TYPE=anthropic --cred ASK_API_KEY=sk-ant-... \
+    --cred ASK_MODEL=claude-opus-4-7
 
-shepherd smcp add ask_grok --command "ask-smcp-server" \
-    --credential ASK_TYPE=openai --credential ASK_API_KEY=xai-... \
-    --credential ASK_MODEL=grok-2-latest \
-    --credential ASK_BASE_URL=https://api.x.ai/v1
+shepherd smcp add ask_grok ask-smcp-server \
+    --cred ASK_TYPE=openai --cred ASK_API_KEY=xai-... \
+    --cred ASK_MODEL=grok-2-latest \
+    --cred ASK_BASE_URL=https://api.x.ai/v1
 ```
 
 Same binary, same credential keys; Shepherd injects them via the SMCP handshake on stdin instead of through the environment.

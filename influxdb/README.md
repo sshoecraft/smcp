@@ -32,7 +32,7 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add influxdb --command "influxdb-smcp-server" --credential "INFLUXDB_HOST=localhost" --credential "INFLUXDB_PORT=8086" --credential "INFLUXDB_USERNAME=admin" --credential "INFLUXDB_PASSWORD=..." --credential "INFLUXDB_DATABASE=telegraf"
+shepherd smcp add influxdb influxdb-smcp-server --cred INFLUXDB_HOST=localhost --cred INFLUXDB_PORT=8086 --cred INFLUXDB_USERNAME=admin --cred INFLUXDB_PASSWORD=... --cred INFLUXDB_DATABASE=telegraf
 ```
 
 ## Usage

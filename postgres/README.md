@@ -29,13 +29,13 @@ The server accepts the following credentials via SMCP JSON:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add postgres --command "postgres-smcp-server" --credential "DATABASE_URL=postgresql://user:pass@host:5432/dbname"
+shepherd smcp add postgres postgres-smcp-server --cred DATABASE_URL=postgresql://user:pass@host:5432/dbname
 ```
 
 Or with individual credentials:
 
 ```bash
-shepherd smcp add postgres --command "postgres-smcp-server" --credential "DB_HOST=localhost" --credential "DB_PORT=5432" --credential "DB_USER=postgres" --credential "DB_PASS=..." --credential "DB_NAME=mydb"
+shepherd smcp add postgres postgres-smcp-server --cred DB_HOST=localhost --cred DB_PORT=5432 --cred DB_USER=postgres --cred DB_PASS=... --cred DB_NAME=mydb
 ```
 
 ## Usage

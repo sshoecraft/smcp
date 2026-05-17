@@ -44,18 +44,16 @@ search:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add search \
-    --command "search-smcp-server" \
-    --credential "SEARCH_HOST=192.168.1.10" \
-    --credential "SEARCH_PORT=8080"
+shepherd smcp add search search-smcp-server \
+    --cred SEARCH_HOST=192.168.1.10 \
+    --cred SEARCH_PORT=8888
 ```
 
 Or with a full URL:
 
 ```bash
-shepherd smcp add search \
-    --command "search-smcp-server" \
-    --credential "SEARCH_HOST=http://searx.lan:8080"
+shepherd smcp add search search-smcp-server \
+    --cred SEARCH_HOST=http://searx.lan:8888
 ```
 
 ## MCP Tools

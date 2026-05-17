@@ -42,7 +42,7 @@ Grant admin consent for these permissions in the Azure portal.
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add sharepoint --command "sharepoint-smcp-server" --credential "TENANT_ID=your-tenant-id" --credential "CLIENT_ID=your-client-id" --credential "CLIENT_SECRET=your-secret" --credential "SITE_URL=https://contoso.sharepoint.com/sites/TeamSite"
+shepherd smcp add sharepoint sharepoint-smcp-server --cred TENANT_ID=your-tenant-id --cred CLIENT_ID=your-client-id --cred CLIENT_SECRET=your-secret --cred SITE_URL=https://contoso.sharepoint.com/sites/TeamSite
 ```
 
 ## Usage
