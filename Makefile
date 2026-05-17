@@ -21,7 +21,7 @@ LIB_PKG := lib
 
 # Server packages (each has its own pyproject.toml)
 SERVER_PKGS := adls alpaca alphavantage ask ebay ecobee econet homekit influxdb \
-               matrix moltbook mqtt postgres search sharepoint
+               matrix moltbook mqtt postgres searxng sharepoint
 
 ALL_PKGS := $(LIB_PKG) $(SERVER_PKGS)
 

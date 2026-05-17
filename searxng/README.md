@@ -1,4 +1,4 @@
-# Search SMCP Server
+# SearXNG SMCP Server
 
 An MCP server that exposes a **local SearXNG instance** as a web-search tool, with SMCP (Secure MCP Credential Protocol) support for secure credential injection.
 
@@ -44,7 +44,7 @@ search:
 ## Quick Start with Shepherd
 
 ```bash
-shepherd smcp add search search-smcp-server \
+shepherd smcp add searxng searxng-smcp-server \
     --cred SEARCH_HOST=192.168.1.10 \
     --cred SEARCH_PORT=8888
 ```
@@ -52,7 +52,7 @@ shepherd smcp add search search-smcp-server \
 Or with a full URL:
 
 ```bash
-shepherd smcp add search search-smcp-server \
+shepherd smcp add searxng searxng-smcp-server \
     --cred SEARCH_HOST=http://searx.lan:8888
 ```
 
@@ -98,7 +98,7 @@ make
 ## Usage
 
 ```bash
-search-smcp-server
+searxng-smcp-server
 ```
 
 The server performs the SMCP handshake on startup:

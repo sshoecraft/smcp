@@ -9,8 +9,8 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 from smcp import handshake as smcp_handshake, check_credentials_schema
 
-from search_smcp_server.client import SearxngClient, SearxngError, trim_results
-from search_smcp_server.config import SearchConfig
+from searxng_smcp_server.client import SearxngClient, SearxngError, trim_results
+from searxng_smcp_server.config import SearchConfig
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,7 +37,7 @@ CREDENTIALS_SCHEMA = {
 
 
 def create_server(config: SearchConfig, client: SearxngClient) -> FastMCP:
-    mcp = FastMCP("SearchSMCP")
+    mcp = FastMCP("SearxngSMCP")
 
     @mcp.tool(
         name="search",

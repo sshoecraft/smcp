@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from search_smcp_server.config import SearchConfig
+from searxng_smcp_server.config import SearchConfig
 
 logger = logging.getLogger(__name__)
 
