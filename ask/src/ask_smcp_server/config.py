@@ -14,6 +14,11 @@ DEFAULT_BASE_URLS = {
 
 DEFAULT_SYSTEM = "You are a helpful AI assistant."
 DEFAULT_MAX_TOKENS = 65536
+DEFAULT_TIMEOUT = 600.0
+DEFAULT_THINKING_LEVEL = "high"
+DEFAULT_AUTO_CONTINUE = True
+
+VALID_THINKING_LEVELS = ("minimal", "low", "medium", "high")
 
 
 @dataclass
@@ -25,6 +30,9 @@ class AskConfig:
     base_url: str
     max_tokens: int
     system: str
+    timeout: float
+    thinking_level: str
+    auto_continue: bool
 
     @classmethod
     def from_smcp_creds(cls, creds: Dict[str, str]) -> "AskConfig":
@@ -51,6 +59,22 @@ class AskConfig:
 
         system = creds.get("ASK_SYSTEM", "").strip() or DEFAULT_SYSTEM
 
+        timeout_raw = creds.get("ASK_TIMEOUT", "").strip()
+        timeout = float(timeout_raw) if timeout_raw else DEFAULT_TIMEOUT
+
+        thinking_level = creds.get("ASK_THINKING_LEVEL", "").strip().lower() or DEFAULT_THINKING_LEVEL
+        if thinking_level not in VALID_THINKING_LEVELS:
+            raise ValueError(
+                f"ASK_THINKING_LEVEL='{thinking_level}' is not supported. Valid values: "
+                + ", ".join(VALID_THINKING_LEVELS)
+            )
+
+        auto_continue_raw = creds.get("ASK_AUTO_CONTINUE", "").strip().lower()
+        if auto_continue_raw == "":
+            auto_continue = DEFAULT_AUTO_CONTINUE
+        else:
+            auto_continue = auto_continue_raw in ("1", "true", "yes", "on")
+
         return cls(
             type=type_value,
             api_key=api_key,
@@ -58,4 +82,7 @@ class AskConfig:
             base_url=base_url,
             max_tokens=max_tokens,
             system=system,
+            timeout=timeout,
+            thinking_level=thinking_level,
+            auto_continue=auto_continue,
         )

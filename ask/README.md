@@ -20,6 +20,9 @@ Same keys whether passed via SMCP handshake (Shepherd) or env (Claude Code `--in
 | `ASK_BASE_URL`  | no       | overrides vendor endpoint (lets `openai` cover Grok/xAI, vLLM, etc.) |
 | `ASK_MAX_TOKENS`| no       | default max_output_tokens per response, fallback 65536. Reasoning models (e.g. Gemini 3.x Pro) consume hidden "thought" tokens against this cap — keep it generous. |
 | `ASK_SYSTEM`    | no       | default system prompt |
+| `ASK_TIMEOUT`   | no       | HTTP request timeout in seconds, default 600. Deep reasoning calls can take minutes. |
+| `ASK_THINKING_LEVEL` | no  | Gemini-only. Thinking effort: `minimal`, `low`, `medium`, `high` (default `high`). Tune down to reclaim visible-output budget. |
+| `ASK_AUTO_CONTINUE` | no   | Gemini-only. If the response hits `MAX_TOKENS`, issue a single bounded continuation call (default `1`). Set `0` to disable. Cap is one retry per ask — worst case 2 API calls. |
 | `LOG_LEVEL`     | no       | default INFO |
 
 ### Defaults per type
@@ -37,7 +40,8 @@ Same keys whether passed via SMCP handshake (Shepherd) or env (Claude Code `--in
   - `system` (string, optional) — overrides `ASK_SYSTEM`
   - `model` (string, optional) — per-call model override
   - `max_tokens` (number, optional) — per-call cap override
-  - Returns: `{"success": "true", "content": "...", "model": "..."}` on success, `{"success": "false", "error": "...", "model": "..."}` on failure.
+  - Returns on success: `{"success": "true", "content": "...", "model": "...", "finish_reason": "STOP|MAX_TOKENS|...", "continuations": "0|1", "prompt_tokens": "N", "output_tokens": "N", "thoughts_tokens": "N", "total_tokens": "N"}`. The token counts and `finish_reason` are Gemini-only (other vendors return the base fields). `continuations=1` means an auto-continuation fired.
+  - Returns on failure: `{"success": "false", "error": "...", "model": "..."}`.
 
 The tool description rendered to the calling model includes the resolved vendor and model so the caller knows which backend it is hitting.
 

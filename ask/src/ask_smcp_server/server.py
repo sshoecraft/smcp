@@ -27,11 +27,12 @@ CREDENTIALS_SCHEMA = {
         "ASK_BASE_URL": "Override the vendor's default endpoint (lets openai-type cover Grok/xAI, vLLM, etc.)",
         "ASK_MAX_TOKENS": "Default max_tokens for completions (default: 65536). Note: this is the per-response output cap (max_output_tokens), not the model's context window.",
         "ASK_SYSTEM": "Default system prompt (default: 'You are a helpful AI assistant.')",
+        "ASK_TIMEOUT": "HTTP request timeout in seconds (default: 600). Deep reasoning calls can take minutes.",
+        "ASK_THINKING_LEVEL": "Gemini-only. Thinking effort: minimal, low, medium, high (default: high). Lower values reclaim visible-output budget at the cost of reasoning depth.",
+        "ASK_AUTO_CONTINUE": "Gemini-only. If the response hits MAX_TOKENS, issue a single bounded continuation call (default: 1). Set 0 to disable.",
         "LOG_LEVEL": "Logging level (default: INFO)",
     },
 }
-
-REQUEST_TIMEOUT = 60.0
 
 
 def create_server(config: AskConfig, http: httpx.AsyncClient) -> FastMCP:
@@ -87,10 +88,12 @@ def main():
 
         config = AskConfig.from_smcp_creds(creds)
         logger.info(
-            f"Ask SMCP service starting: type={config.type} model={config.model} base_url={config.base_url}"
+            f"Ask SMCP service starting: type={config.type} model={config.model} "
+            f"base_url={config.base_url} timeout={config.timeout}s "
+            f"thinking_level={config.thinking_level} auto_continue={config.auto_continue}"
         )
 
-        http = httpx.AsyncClient(timeout=REQUEST_TIMEOUT)
+        http = httpx.AsyncClient(timeout=config.timeout)
         mcp = create_server(config, http)
         mcp.run(transport="stdio")
 
