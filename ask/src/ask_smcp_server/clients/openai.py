@@ -7,6 +7,14 @@ import httpx
 from ask_smcp_server.clients.base import http_error_text
 
 
+def uses_max_completion_tokens(model: str) -> bool:
+    """GPT-5 family and o-series reasoning models reject max_tokens and require max_completion_tokens."""
+    name = model.lower()
+    if name.startswith(("gpt-5", "o1", "o3", "o4")):
+        return True
+    return False
+
+
 async def ask(
     config,
     http: httpx.AsyncClient,
@@ -20,13 +28,14 @@ async def ask(
         "Authorization": f"Bearer {config.api_key}",
         "Content-Type": "application/json",
     }
+    token_param = "max_completion_tokens" if uses_max_completion_tokens(model) else "max_tokens"
     body = {
         "model": model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": prompt},
         ],
-        "max_tokens": max_tokens,
+        token_param: max_tokens,
     }
 
     try:
