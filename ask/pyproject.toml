@@ -1,6 +1,6 @@
 [project]
 name = "ask-smcp-server"
-version = "0.2.1"
+version = "0.3.0"
 description = "SMCP-enabled MCP server that exposes an external LLM provider (Gemini, OpenAI, Anthropic) as a single 'query' tool"
 authors = [
     { name = "SMCP Project" },

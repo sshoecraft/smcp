@@ -17,8 +17,10 @@ DEFAULT_MAX_TOKENS = 65536
 DEFAULT_TIMEOUT = 600.0
 DEFAULT_THINKING_LEVEL = "high"
 DEFAULT_AUTO_CONTINUE = True
+DEFAULT_REASONING_EFFORT = None
 
 VALID_THINKING_LEVELS = ("minimal", "low", "medium", "high")
+VALID_REASONING_EFFORTS = ("minimal", "low", "medium", "high")
 
 
 @dataclass
@@ -33,6 +35,7 @@ class AskConfig:
     timeout: float
     thinking_level: str
     auto_continue: bool
+    reasoning_effort: Optional[str]
 
     @classmethod
     def from_smcp_creds(cls, creds: Dict[str, str]) -> "AskConfig":
@@ -75,6 +78,13 @@ class AskConfig:
         else:
             auto_continue = auto_continue_raw in ("1", "true", "yes", "on")
 
+        reasoning_effort = creds.get("ASK_REASONING_EFFORT", "").strip().lower() or DEFAULT_REASONING_EFFORT
+        if reasoning_effort is not None and reasoning_effort not in VALID_REASONING_EFFORTS:
+            raise ValueError(
+                f"ASK_REASONING_EFFORT='{reasoning_effort}' is not supported. Valid values: "
+                + ", ".join(VALID_REASONING_EFFORTS)
+            )
+
         return cls(
             type=type_value,
             api_key=api_key,
@@ -85,4 +95,5 @@ class AskConfig:
             timeout=timeout,
             thinking_level=thinking_level,
             auto_continue=auto_continue,
+            reasoning_effort=reasoning_effort,
         )

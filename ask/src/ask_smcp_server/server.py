@@ -29,7 +29,8 @@ CREDENTIALS_SCHEMA = {
         "ASK_SYSTEM": "Default system prompt (default: 'You are a helpful AI assistant.')",
         "ASK_TIMEOUT": "HTTP request timeout in seconds (default: 600). Deep reasoning calls can take minutes.",
         "ASK_THINKING_LEVEL": "Gemini-only. Thinking effort: minimal, low, medium, high (default: high). Lower values reclaim visible-output budget at the cost of reasoning depth.",
-        "ASK_AUTO_CONTINUE": "Gemini-only. If the response hits MAX_TOKENS, issue a single bounded continuation call (default: 1). Set 0 to disable.",
+        "ASK_REASONING_EFFORT": "OpenAI reasoning-model-only (gpt-5/o-series). Reasoning effort: minimal, low, medium, high (default: unset = model default). Lower values reclaim visible-output budget at the cost of reasoning depth.",
+        "ASK_AUTO_CONTINUE": "All vendors. If the response hits the output cap (MAX_TOKENS/length/max_tokens) with visible text, issue a single bounded continuation call (default: 1). Set 0 to disable.",
         "LOG_LEVEL": "Logging level (default: INFO)",
     },
 }
@@ -91,6 +92,7 @@ def main():
             f"Ask SMCP service starting: type={config.type} model={config.model} "
             f"base_url={config.base_url} timeout={config.timeout}s "
             f"thinking_level={config.thinking_level} auto_continue={config.auto_continue}"
+            f" reasoning_effort={config.reasoning_effort}"
         )
 
         http = httpx.AsyncClient(timeout=config.timeout)

@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .shepherd_session*
 pip.log
+
+# macOS AppleDouble sidecars + Finder droppings
+._*
+.DS_Store
