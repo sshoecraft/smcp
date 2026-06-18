@@ -131,6 +131,9 @@ class EcoNetClient:
     def __init__(self, config: EcoNetConfig):
         self.config = config
         self.session = requests.Session()
+        self.session.verify = False
+        # Suppress InsecureRequestWarning
+        requests.packages.urllib3.disable_warnings()
         self.user_token: str = ""
         self.account_id: str = ""
         self.mqtt_client: Optional[mqtt.Client] = None
