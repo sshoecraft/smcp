@@ -17,9 +17,13 @@ CONTINUE_PROMPT = (
 
 
 def uses_max_completion_tokens(model: str) -> bool:
-    """GPT-5 family and o-series reasoning models reject max_tokens and require max_completion_tokens."""
+    """GPT-5/GPT-6 families and o-series reasoning models reject max_tokens and require max_completion_tokens.
+
+    Verified against the live API for gpt-6-astra, which answers max_tokens with
+    "Unsupported parameter: 'max_tokens' is not supported with this model."
+    """
     name = model.lower()
-    if name.startswith(("gpt-5", "o1", "o3", "o4")):
+    if name.startswith(("gpt-5", "gpt-6", "o1", "o3", "o4")):
         return True
     return False
 

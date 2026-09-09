@@ -11,7 +11,7 @@
 REQ_FILE ?= requirements.txt
 
 # Name of the virtual-env directory (set to empty to skip venv creation)
-#VENV_DIR ?= .venv
+#VENV_DIR ?= $HOME/.venvs/smcp
 
 # Pip command – automatically picks up the venv if it exists
 PIP := $(if $(VENV_DIR),$(VENV_DIR)/bin/pip3,pip3)
@@ -58,11 +58,11 @@ install: $(ALL_PKGS)
 
 $(LIB_PKG):
 	@echo "Installing $@..."
-	@$(PIP) install -e ./$@
+	@$(PIP) install ./$@
 
 $(SERVER_PKGS): $(LIB_PKG)
 	@echo "Installing $@..."
-	@$(PIP) install -e ./$@
+	@$(PIP) install ./$@
 
 # -----------------------------------------------------------------
 # Verify that every requirement is satisfied

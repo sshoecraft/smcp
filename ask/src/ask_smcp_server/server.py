@@ -29,7 +29,7 @@ CREDENTIALS_SCHEMA = {
         "ASK_SYSTEM": "Default system prompt (default: 'You are a helpful AI assistant.')",
         "ASK_TIMEOUT": "HTTP request timeout in seconds (default: 600). Deep reasoning calls can take minutes.",
         "ASK_THINKING_LEVEL": "Gemini-only. Thinking effort: minimal, low, medium, high (default: high). Lower values reclaim visible-output budget at the cost of reasoning depth.",
-        "ASK_REASONING_EFFORT": "OpenAI reasoning-model-only (gpt-5/o-series). Reasoning effort: minimal, low, medium, high (default: unset = model default). Lower values reclaim visible-output budget at the cost of reasoning depth.",
+        "ASK_REASONING_EFFORT": "OpenAI reasoning-model-only (gpt-5/gpt-6/o-series). Reasoning effort: minimal, low, medium, high, xhigh, max (default: unset = model default). gpt-6 takes low/medium/high/xhigh (max is Responses-API only) and rejects minimal; gpt-5/o-series take minimal/low/medium/high. Lower values reclaim visible-output budget at the cost of reasoning depth.",
         "ASK_AUTO_CONTINUE": "All vendors. If the response hits the output cap (MAX_TOKENS/length/max_tokens) with visible text, issue a single bounded continuation call (default: 1). Set 0 to disable.",
         "LOG_LEVEL": "Logging level (default: INFO)",
     },

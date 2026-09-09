@@ -20,7 +20,10 @@ DEFAULT_AUTO_CONTINUE = True
 DEFAULT_REASONING_EFFORT = None
 
 VALID_THINKING_LEVELS = ("minimal", "low", "medium", "high")
-VALID_REASONING_EFFORTS = ("minimal", "low", "medium", "high")
+# "xhigh" and "max" arrived with GPT-6; "minimal" is GPT-5/o-series only and is
+# rejected by GPT-6. The union is accepted here and the vendor rejects whatever
+# the chosen model does not implement.
+VALID_REASONING_EFFORTS = ("minimal", "low", "medium", "high", "xhigh", "max")
 
 
 @dataclass

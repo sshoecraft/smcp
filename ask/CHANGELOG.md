@@ -5,6 +5,12 @@ All notable changes to the Ask SMCP server are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-09-09
+
+### Added
+- **GPT-6 support.** `gpt-6-*` models are now recognised as reasoning models, so the request carries `max_completion_tokens` instead of `max_tokens`. Without this every `gpt-6-astra` call failed outright with `Unsupported parameter: 'max_tokens' is not supported with this model` — the model-name test only knew `gpt-5`/o-series.
+- **`xhigh` and `max` reasoning-effort levels**, which GPT-6 introduced. `ASK_REASONING_EFFORT` accepts the union of every vendor level and lets the API reject one its model does not implement; GPT-6 takes `low`/`medium`/`high`/`xhigh` on Chat Completions and rejects `minimal`, while `gpt-5`/o-series still take `minimal`.
+
 ## [0.3.0] - 2026-06-13
 
 ### Added

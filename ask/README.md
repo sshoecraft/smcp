@@ -22,7 +22,7 @@ Same keys whether passed via SMCP handshake (Shepherd) or env (Claude Code `--in
 | `ASK_SYSTEM`    | no       | default system prompt |
 | `ASK_TIMEOUT`   | no       | HTTP request timeout in seconds, default 600. Deep reasoning calls can take minutes. |
 | `ASK_THINKING_LEVEL` | no  | Gemini-only. Thinking effort: `minimal`, `low`, `medium`, `high` (default `high`). Tune down to reclaim visible-output budget. |
-| `ASK_REASONING_EFFORT` | no | OpenAI reasoning models only (`gpt-5`/o-series). Reasoning effort: `minimal`, `low`, `medium`, `high` (default unset → model default). Ignored for non-reasoning models. Tune down to reclaim visible-output budget. |
+| `ASK_REASONING_EFFORT` | no | OpenAI reasoning models only (`gpt-5`/`gpt-6`/o-series). Reasoning effort: `minimal`, `low`, `medium`, `high`, `xhigh`, `max` (default unset → model default). Not every level exists on every model — `gpt-6` takes `low`/`medium`/`high`/`xhigh` (`max` is Responses-API only) and rejects `minimal`; `gpt-5`/o-series take `minimal`/`low`/`medium`/`high`. The vendor rejects a level its model does not implement. Ignored for non-reasoning models. Tune down to reclaim visible-output budget. |
 | `ASK_AUTO_CONTINUE` | no   | All vendors. If the response hits the output cap (`MAX_TOKENS`/`length`/`max_tokens`) with visible text, issue a single bounded continuation call (default `1`). Set `0` to disable. Cap is one retry per ask — worst case 2 API calls. |
 | `LOG_LEVEL`     | no       | default INFO |
 
@@ -55,6 +55,9 @@ claude mcp add ask_gemini -- ask-smcp-server --insecure
 claude mcp add ask_opus -- ask-smcp-server --insecure
   env: ASK_TYPE=anthropic ASK_API_KEY=sk-ant-... ASK_MODEL=claude-opus-4-7
 
+claude mcp add ask_astra -- ask-smcp-server --insecure
+  env: ASK_TYPE=openai ASK_API_KEY=sk-proj-... ASK_MODEL=gpt-6-astra
+
 claude mcp add ask_grok -- ask-smcp-server --insecure
   env: ASK_TYPE=openai ASK_API_KEY=xai-... ASK_MODEL=grok-2-latest ASK_BASE_URL=https://api.x.ai/v1
 ```
@@ -64,6 +67,7 @@ Tools surfaced to the model:
 ```
 mcp__ask_gemini__query
 mcp__ask_opus__query
+mcp__ask_astra__query
 mcp__ask_grok__query
 ```
 
